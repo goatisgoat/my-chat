@@ -4,6 +4,7 @@ import Login from "../pages/Login";
 import Resister from "../pages/Resister";
 import GlobalLayout from "../components/GlobalLayout";
 import Message from "../pages/Message";
+import PrivateRoute from "../privateRrote/PrivateRoute";
 
 const Router = () => {
   return (
@@ -14,7 +15,14 @@ const Router = () => {
         </Route>
         <Route path="/login" element={<Login />} />
         <Route path="/resister" element={<Resister />} />
-        <Route path="/message/:id" element={<Message />} />
+        <Route
+          path="/message/:id"
+          element={
+            <PrivateRoute>
+              <Message />
+            </PrivateRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );

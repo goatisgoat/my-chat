@@ -5,8 +5,9 @@ type RealTimeMsg = {
   conversationId: string;
   createdAt: Date;
   sender: string;
+  lastSenderName: string;
   text: string;
-  updatedAt?: Date | null;
+  updatedAt: Date | null;
   __v?: number | null;
   _id?: string | null;
 };
@@ -16,6 +17,7 @@ type SocketState = {
   isSocket: boolean;
   realTimeMsg: RealTimeMsg | null;
   realTimeUser: { userId: string; socketId: string }[] | null;
+  newConversationFriend: string;
 };
 
 const initialState: SocketState = {
@@ -23,6 +25,7 @@ const initialState: SocketState = {
   isSocket: false,
   realTimeMsg: null,
   realTimeUser: null,
+  newConversationFriend: "",
 };
 const socketSlice = createSlice({
   name: "socket",
@@ -43,9 +46,17 @@ const socketSlice = createSlice({
     ) => {
       state.realTimeUser = action.payload;
     },
+    newConversationFc: (state, action: PayloadAction<string>) => {
+      state.newConversationFriend = action.payload;
+    },
   },
 });
 
 export default socketSlice.reducer;
-export const { socketInfo, isSocketFc, realTimeMsgFc, realTimeUserFc } =
-  socketSlice.actions;
+export const {
+  socketInfo,
+  isSocketFc,
+  realTimeMsgFc,
+  realTimeUserFc,
+  newConversationFc,
+} = socketSlice.actions;
