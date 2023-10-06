@@ -20,10 +20,4 @@
 
 ## 화면구성
 
-회원가입
-
-로그인
-
-메인페이지
-
-채팅 페이지
+<img width="2902" alt="Cover" src="https://github.com/goatisgoat/my-chat/assets/129598273/32801eb9-2eff-4395-a3f6-abd0bd437fe3">
