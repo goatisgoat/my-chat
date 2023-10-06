@@ -4,6 +4,7 @@ import { RootState } from "../../redux/config/ConfigStore";
 import { ReactNode, useEffect, useState } from "react";
 import api from "../../utils/api";
 import { useNavigate } from "react-router-dom";
+import { Socket } from "socket.io-client";
 
 type Props = {
   conversation: {
@@ -35,6 +36,7 @@ const AddUser = ({ conversation, userState }: Props) => {
   >([]);
   const [isOpenList, setIsOpenList] = useState(false);
   const [allUsers, setAllUsers] = useState<AllUsers[] | null>(null);
+  const socket = useSelector((state: RootState) => state.socket.socketState);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -62,6 +64,12 @@ const AddUser = ({ conversation, userState }: Props) => {
     const response = await api.post(`/conversation`, {
       senderId: userState._id,
       receiverId: id,
+    });
+    const socketAsSocket = socket as Socket;
+
+    socketAsSocket.emit("createChat", {
+      receiverId: id,
+      senderId: userState._id,
     });
     navigate(`/message/${response.data.savedConversation._id}`);
   };
@@ -104,6 +112,7 @@ const AddUser = ({ conversation, userState }: Props) => {
     });
   };
 
+  // console.log(realTimeUser, "realTimeUser");
   return (
     <>
       <Container>
@@ -123,7 +132,7 @@ const AddUser = ({ conversation, userState }: Props) => {
           <ModalOuter onClick={() => setIsOpenList((pre) => !pre)}></ModalOuter>
           <ModalInner>
             <ListTitle>UserList - Total</ListTitle>
-            {realTimeFriends?.map((u) => allUsersList() as ReactNode)}
+            {allUsersList() as ReactNode}
           </ModalInner>
         </>
       ) : null}

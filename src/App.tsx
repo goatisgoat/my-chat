@@ -7,6 +7,11 @@ import { Provider } from "react-redux";
 import store from "./redux/config/ConfigStore";
 
 function App() {
+  const getUser = async () => {
+    try {
+      const token = sessionStorage.getItem("token");
+    } catch (error) {}
+  };
   return (
     <>
       <ThemeProvider theme={theme}>

@@ -9,6 +9,8 @@ type Props = {
   conversations: {
     createdAt: Date;
     members: string[];
+    lastSenderName: string;
+    lastMessage: string;
     updatedAt: Date;
     __v: number;
     _id: string;
@@ -25,47 +27,37 @@ type FriendInfo = {
   _id: string;
 };
 
-type LastMessage = {
-  conversationId: string;
-  createdAt: Date;
-  sender: string;
-  text: string;
-  updatedAt: Date;
-  __v: number;
-  _id: string;
-};
-
 const UserList = ({ conversations, userId }: Props) => {
   const realTimeMsg = useSelector(
     (state: RootState) => state.socket.realTimeMsg
+  );
+  const newConversationFriend = useSelector(
+    (state: RootState) => state.socket.newConversationFriend
   );
   const [friendId, setFriendId] = useState(
     conversations.members.find((f) => f !== userId)
   );
   const [friendInfo, setFriendInfo] = useState<FriendInfo | null>(null);
-  const [lastMessage, setLastMessage] = useState<LastMessage | null>(null);
+
   const navigate = useNavigate();
 
   useEffect(() => {
     const getFriendName = async () => {
-      const response = await api.get(`/user/${friendId}`);
+      const aaa = conversations.members.find((f) => f !== userId);
+      const response = await api.get(`/user/${aaa}`);
       setFriendInfo(response.data.user);
     };
 
-    const getLastMessage = async () => {
-      const response = await api.get(`/message/last/${conversations._id}`);
-      setLastMessage(response.data.message);
-    };
     getFriendName();
-    getLastMessage();
-  }, [userId]);
+  }, [userId, newConversationFriend, friendId]);
 
+  console.log("UserList");
   const lastMsg = () => {
     if (conversations._id === realTimeMsg?.conversationId) {
       return realTimeMsg.text;
     }
 
-    return lastMessage?.text;
+    return conversations?.lastMessage;
   };
 
   const lastTime = (d: Date) => {
@@ -81,7 +73,7 @@ const UserList = ({ conversations, userId }: Props) => {
         <UserImg></UserImg>
         <NameMassageWrap>
           <div>{friendInfo?.name}</div>
-          {lastMessage?.text ? (
+          {conversations?.lastMessage ? (
             <div>{lastMsg()}</div>
           ) : (
             <div>메시지가 없습니다</div>
@@ -89,7 +81,7 @@ const UserList = ({ conversations, userId }: Props) => {
         </NameMassageWrap>
       </ImgWrap>
       <Time>
-        {lastMessage?.createdAt ? lastTime(lastMessage?.createdAt) : ""}
+        {conversations?.updatedAt ? lastTime(conversations?.updatedAt) : ""}
       </Time>
     </ListContainer>
   );

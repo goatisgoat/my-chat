@@ -76,15 +76,17 @@ const Message = () => {
 
     const message = {
       conversationId: conversationId,
-      sender: userState._id,
+      senderId: userState._id,
       text: newMessage,
+      lastSenderName: userState.name,
     };
 
     //socket;
     if (Object.keys(socket).length !== 0) {
       const socketAsSocket = socket as Socket;
       socketAsSocket.emit("sendMessage", {
-        senderId: userState._id,
+        sender: userState._id,
+        lastSenderName: userState.name,
         receiverId: friendInfo?._id,
         text: newMessage,
         conversationId: conversationId,
