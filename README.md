@@ -2,6 +2,7 @@
 
 실시간 채팅 서비스입니다.
 
+BE: https://github.com/goatisgoat/my-chat-BE
 ## 주요기능
 
 - 실시간채팅
