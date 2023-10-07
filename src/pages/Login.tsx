@@ -1,11 +1,14 @@
 import { useState } from "react";
-import { useDispatch } from "react-redux";
-import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { userInfo } from "../redux/modules/userSlice";
 import api from "../utils/api";
+import { RootState } from "../redux/config/ConfigStore";
 
 const Login = () => {
+  const { userState } = useSelector((state: RootState) => state.user);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -27,6 +30,10 @@ const Login = () => {
       setError("아이디 또는 비밀번호가 일치하지 않습니다.");
     }
   };
+
+  if (userState._id) {
+    return <Navigate to={"/"} />;
+  }
 
   return (
     <LoginContainer>

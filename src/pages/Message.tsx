@@ -1,74 +1,47 @@
 import styled from "styled-components";
 import ChatContants from "../components/chats/ChatContants";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import api from "../utils/api";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/config/ConfigStore";
-import { Socket, io } from "socket.io-client";
-
-type Message = {
-  conversationId: string;
-  createdAt: Date;
-  sender: string;
-  text: string;
-  updatedAt?: Date | null;
-  __v?: number | null;
-  _id?: string | null;
-};
-
-type FriendInfo = {
-  createdAt: Date;
-  email: string;
-  name: string;
-  updatedAt: Date;
-  __v: number;
-  _id: string;
-};
-
-type RealTimeMsg = {
-  conversationId: string;
-  createdAt: Date;
-  sender: string;
-  text: string;
-  updatedAt?: Date | null;
-  __v?: number | null;
-  _id?: string | null;
-};
+import { Socket } from "socket.io-client";
+import { MessageType } from "../model/messageType";
+import { FriendInfo } from "../model/user";
 
 const Message = () => {
+  //useSelector
   const { userState } = useSelector((state: RootState) => state.user);
-  const realTimeUser = useSelector(
-    (state: RootState) => state.socket.realTimeUser
-  );
+  const socket = useSelector((state: RootState) => state.socket.socketState);
   const realTimeMsg = useSelector(
     (state: RootState) => state.socket.realTimeMsg
   );
+
   const [friendInfo, setFriendInfo] = useState<FriendInfo | null>(null);
-  const [message, setMessage] = useState<Message[]>([]);
-  // const [receivedMessage, setReceivedMessage] = useState<Message | null>(null);
+  const [message, setMessage] = useState<MessageType[]>([]);
   const [newMessage, setNewMessage] = useState<string>("");
 
   const navigate = useNavigate();
-  const socket = useSelector((state: RootState) => state.socket.socketState);
-
   const location = useLocation();
   const conversationId = location.pathname.split("/")[2];
 
   useEffect(() => {
-    const getMessage = async () => {
-      const response = await api.get(`/message/${conversationId}`);
-      setMessage(response.data.messages);
-    };
+    const getApi = async () => {
+      const messagerResponse = await api.get(`/message/${conversationId}`);
 
-    const getFriend = async () => {
-      const response = await api.post(`/user/find-friend/${conversationId}`, {
+      const friendResponse = await api.post(`/user/find-friend`, {
+        conversationId,
         userId: userState._id,
       });
-      setFriendInfo(response.data.friendInfo);
+
+      if (!messagerResponse || !friendResponse) {
+        return;
+      }
+      setMessage(messagerResponse.data.messages);
+      setFriendInfo(friendResponse.data.friendInfo);
     };
-    getMessage();
-    getFriend();
+
+    getApi();
   }, []);
 
   const handleNewMessage = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -78,14 +51,13 @@ const Message = () => {
       conversationId: conversationId,
       senderId: userState._id,
       text: newMessage,
-      lastSenderName: userState.name,
     };
 
     //socket;
     if (Object.keys(socket).length !== 0) {
       const socketAsSocket = socket as Socket;
       socketAsSocket.emit("sendMessage", {
-        sender: userState._id,
+        senderId: userState._id,
         lastSenderName: userState.name,
         receiverId: friendInfo?._id,
         text: newMessage,
@@ -93,16 +65,21 @@ const Message = () => {
       });
     }
 
-    try {
-      const response = await api.post(`/message`, message);
-      setMessage((pre) => [...pre, response.data.savedMessage]);
-      setNewMessage("");
-    } catch (error) {}
+    const response = await api.post(`/message`, message);
+    setMessage((pre) => [...pre, response.data.savedMessage]);
+    setNewMessage("");
   };
 
   useEffect(() => {
     if (realTimeMsg && realTimeMsg.conversationId === conversationId) {
-      setMessage((pre) => [...pre, realTimeMsg]);
+      const realTimeObj = {
+        conversationId: realTimeMsg.conversationId,
+        createdAt: realTimeMsg.createdAt,
+        senderId: realTimeMsg.senderId,
+        text: realTimeMsg.text,
+      };
+
+      setMessage((pre) => [...pre, realTimeObj]);
     }
   }, [realTimeMsg]);
 

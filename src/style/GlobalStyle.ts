@@ -12,33 +12,8 @@ ${reset}
     body{
         line-height: 1.4;
         font-family: 'Noto Sans KR', sans-serif;
-        background-color: #222;
+        background-color: #323232;
     }
-    
-    /* body::-webkit-scrollbar{
-        width: 10px;
-    }
-    div::-webkit-scrollbar  {
-        width: 8px;
-    }
-
-    body::-webkit-scrollbar-track, 
-    div::-webkit-scrollbar-track  {
-        background-color: #efefef;
-    }
-
-    body::-webkit-scrollbar-thumb {
-        background-color: #ffe2c7;
-        border-radius: 5px;
-    }
-    div::-webkit-scrollbar-thumb {
-        background-color: #ffe2c7;
-        border-radius: 5px;
-    }
-
-    body::-webkit-scrollbar-thumb:hover, div::-webkit-scrollbar-thumb:hover {
-        background-color: #aaa;
-    } */
 
     html, body, div, span, h1, h2, h3, h4, h5, h6, p,
     a, dl, dt, dd, ol, ul, li, form, label, table{

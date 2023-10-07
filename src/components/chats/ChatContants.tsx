@@ -1,21 +1,11 @@
 import { ReactNode, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
+import { MessageType } from "../../model/messageType";
+import { Userstate } from "../../model/user";
 
 type Props = {
-  message: {
-    conversationId: string;
-    createdAt: Date;
-    sender: string;
-    text: string;
-    updatedAt?: Date | null;
-    __v?: number | null;
-    _id?: string | null;
-  }[];
-  userState: {
-    name: string | null;
-    email: string | null;
-    _id: string | null;
-  };
+  message: MessageType[];
+  userState: Userstate;
 };
 
 const ChatContants = ({ message, userState }: Props) => {
@@ -101,21 +91,22 @@ const ChatContants = ({ message, userState }: Props) => {
       );
     } else return null;
   };
+  console.log(message);
   return (
     <Chats>
       {message.map((msg, index) =>
-        msg.sender === userState._id ? (
+        msg.senderId === userState._id ? (
           <>
             {bottomLineDate(msg?.createdAt, message[index - 1]?.createdAt)}
 
-            <MyChatsWrap ref={scrollRef}>
+            <MyChatsWrap ref={scrollRef} key={index}>
               <ContentWrap>
                 <MyTime>
                   {
                     date(
                       msg.createdAt,
-                      msg?.sender,
-                      message[index + 1]?.sender,
+                      msg?.senderId,
+                      message[index + 1]?.senderId,
                       message[index + 1]?.createdAt
                     ) as ReactNode
                   }
@@ -130,7 +121,7 @@ const ChatContants = ({ message, userState }: Props) => {
         ) : (
           <>
             {bottomLineDate(msg?.createdAt, message[index - 1]?.createdAt)}
-            <ChatsWrap ref={scrollRef}>
+            <ChatsWrap ref={scrollRef} key={index}>
               <ChatImg></ChatImg>
               <ContentWrap>
                 <Contant>
@@ -142,8 +133,8 @@ const ChatContants = ({ message, userState }: Props) => {
                     {
                       date(
                         msg.createdAt,
-                        msg?.sender,
-                        message[index + 1]?.sender,
+                        msg?.senderId,
+                        message[index + 1]?.senderId,
                         message[index + 1]?.createdAt
                       ) as ReactNode
                     }
