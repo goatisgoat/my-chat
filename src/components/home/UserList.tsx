@@ -8,50 +8,38 @@ import { RootState } from "../../redux/config/ConfigStore";
 type Props = {
   conversations: {
     createdAt: Date;
-    members: string[];
+    members: {
+      userId: string;
+      userName: string;
+    }[];
     lastSenderName: string;
     lastMessage: string;
     updatedAt: Date;
-    __v: number;
     _id: string;
   };
-  userId: string | null;
+  signedUserId: string | null;
 };
 
-type FriendInfo = {
-  createdAt: Date;
-  email: string;
-  name: string;
-  updatedAt: Date;
-  __v: number;
-  _id: string;
-};
+// type FriendInfo = {
+//   createdAt: Date;
+//   email: string;
+//   name: string;
+//   updatedAt: Date;
+//   __v: number;
+//   _id: string;
+// };
 
-const UserList = ({ conversations, userId }: Props) => {
+const UserList = ({ conversations, signedUserId }: Props) => {
   const realTimeMsg = useSelector(
     (state: RootState) => state.socket.realTimeMsg
   );
-  const newConversationFriend = useSelector(
-    (state: RootState) => state.socket.newConversationFriend
-  );
+
   const [friendId, setFriendId] = useState(
-    conversations.members.find((f) => f !== userId)
+    conversations.members.find((f) => f.userId !== signedUserId)
   );
-  const [friendInfo, setFriendInfo] = useState<FriendInfo | null>(null);
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const getFriendName = async () => {
-      const aaa = conversations.members.find((f) => f !== userId);
-      const response = await api.get(`/user/${aaa}`);
-      setFriendInfo(response.data.user);
-    };
-
-    getFriendName();
-  }, [userId, newConversationFriend, friendId]);
-
-  console.log("UserList");
   const lastMsg = () => {
     if (conversations._id === realTimeMsg?.conversationId) {
       return realTimeMsg.text;
@@ -72,7 +60,7 @@ const UserList = ({ conversations, userId }: Props) => {
       <ImgWrap>
         <UserImg></UserImg>
         <NameMassageWrap>
-          <div>{friendInfo?.name}</div>
+          <div>{friendId?.userName}</div>
           {conversations?.lastMessage ? (
             <div>{lastMsg()}</div>
           ) : (
@@ -98,7 +86,7 @@ const ListContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid gray;
+  border-bottom: 1px solid #6f6f6f78;
 `;
 const ImgWrap = styled.div`
   display: flex;

@@ -3,22 +3,38 @@ import "./App.css";
 import GlobalStyles from "./style/GlobalStyle";
 import { theme } from "./style/theme/index";
 import Router from "./shared/Router";
-import { Provider } from "react-redux";
-import store from "./redux/config/ConfigStore";
+import { useDispatch } from "react-redux";
+import api from "./utils/api";
+import { useEffect } from "react";
+import { userInfo } from "./redux/modules/userSlice";
 
 function App() {
+  const dispatch = useDispatch();
   const getUser = async () => {
     try {
-      const token = sessionStorage.getItem("token");
-    } catch (error) {}
+      const storedToken = sessionStorage.getItem("token");
+      if (storedToken) {
+        const response = await api.get(`/user/auth/me`);
+
+        if (response.status === 200) {
+          dispatch(userInfo(response.data.user));
+        }
+      }
+    } catch (error) {
+      console.log(error);
+      dispatch(userInfo({ name: null, email: null, _id: null }));
+    }
   };
+
+  useEffect(() => {
+    console.log("app-useEffeet");
+    getUser();
+  }, []);
   return (
     <>
       <ThemeProvider theme={theme}>
-        <Provider store={store}>
-          <Router />
-          <GlobalStyles />
-        </Provider>
+        <Router />
+        <GlobalStyles />
       </ThemeProvider>
     </>
   );

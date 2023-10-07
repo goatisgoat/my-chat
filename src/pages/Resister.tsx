@@ -1,9 +1,13 @@
 import { useState } from "react";
 import styled from "styled-components";
 import api from "../utils/api";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { RootState } from "../redux/config/ConfigStore";
 
 const Resister = () => {
+  const { userState } = useSelector((state: RootState) => state.user);
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -23,6 +27,11 @@ const Resister = () => {
       // setError(error.message);
     }
   };
+
+  if (userState._id) {
+    return <Navigate to={"/"} />;
+  }
+
   return (
     <SignContainer>
       <H1>Sign up</H1>

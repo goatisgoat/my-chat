@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../redux/config/ConfigStore";
 import { useEffect, useState } from "react";
 import api from "../utils/api";
-import { io } from "socket.io-client";
+import { io, Socket } from "socket.io-client";
 import {
   socketInfo,
   isSocketFc,
@@ -14,17 +14,7 @@ import {
   realTimeUserFc,
   newConversationFc,
 } from "../redux/modules/socketSlice";
-import { Socket } from "socket.io-client";
-
-type Conversation = {
-  createdAt: Date;
-  members: string[];
-  lastSenderName: string;
-  lastMessage: string;
-  updatedAt: Date;
-  __v: number;
-  _id: string;
-};
+import { Conversation } from "../model/conversation";
 
 const Home = () => {
   const { userState } = useSelector((state: RootState) => state.user);
@@ -60,6 +50,7 @@ const Home = () => {
       socketAsSocket.emit("addUser", userState._id);
       socketAsSocket.on("getUsers", (users) => dispatch(realTimeUserFc(users)));
       socketAsSocket.on("getMessageInHome", (message) => {
+        console.log("message", message);
         dispatch(
           realTimeMsgFc({
             ...message,
@@ -67,7 +58,7 @@ const Home = () => {
           })
         );
       });
-      socketAsSocket.on("receivedChatInfo", (sender) => {
+      socketAsSocket.on("newChatFriendInfo", (sender) => {
         dispatch(newConversationFc(sender[0].userId));
       });
 
@@ -77,14 +68,18 @@ const Home = () => {
 
   useEffect(() => {
     const getConversation = async () => {
-      const response = await api.get(`/conversation/${userState?._id}`);
-      setConversation(response.data.conversation);
+      console.log("home-getConversation");
+      if (userState?._id) {
+        const response = await api.get(`/conversation/${userState?._id}`);
+        setConversation(response.data.conversation);
+      }
     };
 
     getConversation();
   }, [userState._id, newConversationFriend]);
 
   useEffect(() => {
+    console.log("home-realTimeMsg");
     if (realTimeMsg && Object.keys(realTimeMsg).length) {
       setConversation((pre) => {
         return pre.map((p) =>
@@ -128,18 +123,12 @@ const Home = () => {
 
     return conversation.map((con) => {
       const conDate = new Date(con.updatedAt);
-
-      const year = conDate.getFullYear();
-      const month = conDate.getMonth() + 1;
-      const day = conDate.getDate();
-      const hours = conDate.getHours();
-      const minutes = conDate.getMinutes();
-      const Time = conDate.getTime();
-
-      const totalDate = year + month + day + hours + minutes + Time;
-      console.log("conversation.map");
       return (
-        <UserList key={totalDate} conversations={con} userId={userState._id} />
+        <UserList
+          key={conDate.getTime()}
+          conversations={con}
+          signedUserId={userState._id}
+        />
       );
     });
   };

@@ -5,73 +5,70 @@ import { ReactNode, useEffect, useState } from "react";
 import api from "../../utils/api";
 import { useNavigate } from "react-router-dom";
 import { Socket } from "socket.io-client";
+import { Userstate } from "../../model/user";
+import { Conversation } from "../../model/conversation";
 
 type Props = {
-  conversation: {
-    createdAt: Date;
-    members: string[];
-    updatedAt: Date;
-    __v: number;
-    _id: string;
-  }[];
-  userState: { name: string | null; email: string | null; _id: string | null };
+  conversation: Conversation[];
+  userState: Userstate;
 };
 
-type AllUsers = {
-  name: string | null;
-  email: string | null;
-  _id: string | null;
-};
+type AllUsers = Userstate;
 
 const AddUser = ({ conversation, userState }: Props) => {
   const { realTimeUser } = useSelector((state: RootState) => state.socket);
-  const [realTimeFriends, setRealTimeFriends] = useState<
-    {
-      createdAt: Date;
-      members: string[];
-      updatedAt: Date;
-      __v: number;
-      _id: string;
-    }[]
-  >([]);
+  const socket = useSelector((state: RootState) => state.socket.socketState);
+  const [realTimeFriends, setRealTimeFriends] = useState<Conversation[]>([]);
   const [isOpenList, setIsOpenList] = useState(false);
   const [allUsers, setAllUsers] = useState<AllUsers[] | null>(null);
-  const socket = useSelector((state: RootState) => state.socket.socketState);
   const navigate = useNavigate();
 
   useEffect(() => {
     const onlineFriends = conversation?.filter((con) =>
       con.members.some((m) =>
         realTimeUser?.find(
-          (real) => real.userId === m && real.userId !== userState._id
+          (real) => real.userId === m.userId && real.userId !== userState._id
         )
       )
     );
+
     setRealTimeFriends(onlineFriends);
   }, [realTimeUser, userState._id, conversation]);
 
   useEffect(() => {
     if (userState._id) {
-      const findAllUsers = async () => {
+      const getAllUsers = async () => {
         const response = await api.get(`/user/all-users/${userState._id}`);
         setAllUsers(response.data.allUsers);
       };
-      findAllUsers();
+      getAllUsers();
     }
   }, []);
 
-  const makeConversation = async (id: string | null) => {
-    const response = await api.post(`/conversation`, {
-      senderId: userState._id,
-      receiverId: id,
-    });
-    const socketAsSocket = socket as Socket;
+  const createConversation = async (
+    id: string | null,
+    friendName: string | null
+  ) => {
+    try {
+      const response = await api.post(`/conversation`, {
+        senderId: userState._id,
+        senderName: userState.name,
+        receiverId: id,
+        receiverName: friendName,
+      });
 
-    socketAsSocket.emit("createChat", {
-      receiverId: id,
-      senderId: userState._id,
-    });
-    navigate(`/message/${response.data.savedConversation._id}`);
+      if (!response) throw new Error();
+
+      const socketAsSocket = socket as Socket;
+
+      socketAsSocket.emit("createChat", {
+        receiverId: id,
+        senderId: userState._id,
+      });
+      navigate(`/message/${response.data.savedConversation._id}`);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const existedConversation = (conversationId: string | null) => {
@@ -83,7 +80,10 @@ const AddUser = ({ conversation, userState }: Props) => {
       let conversationId = "";
       return conversation.find((con) => {
         conversationId = con._id;
-        return con.members[0] === user._id || con.members[1] === user._id;
+        return (
+          con.members[0].userId === user._id ||
+          con.members[1].userId === user._id
+        );
       }) ? (
         <UserList>
           <UserListImg>
@@ -103,7 +103,7 @@ const AddUser = ({ conversation, userState }: Props) => {
             <div>{user.name}</div>
           </UserListImg>
           <div>
-            <MakeMsgBtn onClick={() => makeConversation(user._id)}>
+            <MakeMsgBtn onClick={() => createConversation(user._id, user.name)}>
               대화 시작
             </MakeMsgBtn>
           </div>
@@ -112,12 +112,11 @@ const AddUser = ({ conversation, userState }: Props) => {
     });
   };
 
-  // console.log(realTimeUser, "realTimeUser");
   return (
     <>
       <Container>
         <AddBtn onClick={() => setIsOpenList((pre) => !pre)}>+</AddBtn>
-        {realTimeFriends.length > 0
+        {userState && realTimeFriends.length > 0
           ? realTimeFriends.map((f) => (
               <OnLineUser onClick={() => navigate(`/message/${f._id}`)}>
                 <OnLineUserImg></OnLineUserImg>
@@ -182,12 +181,12 @@ const OnLineUserImg = styled.div`
 `;
 
 const OnLineCircle = styled.div`
-  width: 15px;
-  height: 15px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   background-color: #80fb80;
   bottom: 5px;
-  right: 0;
+  right: 5px;
   position: absolute;
 `;
 
