@@ -1,20 +1,11 @@
 import styled from "styled-components";
+import { colors } from "../../../style/theme/colors";
 
-const Search = () => {
-  return (
-    <SearchContainer>
-      <input type="text" placeholder="Search" />
-    </SearchContainer>
-  );
-};
-
-export default Search;
-
-const SearchContainer = styled.div`
+export const SearchContainer = styled.div`
   width: 80%;
   height: 40px;
   margin: 30px auto;
-  border: 1px solid white;
+  border: 1px solid ${colors.white};
   border-radius: 20px;
 
   & > input {

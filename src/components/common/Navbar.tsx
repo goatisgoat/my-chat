@@ -1,7 +1,7 @@
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
-import { RootState } from "../redux/config/ConfigStore";
+import { RootState } from "../../redux/config/ConfigStore";
 
 const Navbar = () => {
   const { userState } = useSelector((state: RootState) => state.user);

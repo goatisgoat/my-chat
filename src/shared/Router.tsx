@@ -1,9 +1,9 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import Home from "../pages/Home";
-import Login from "../pages/Login";
-import Resister from "../pages/Resister";
-import GlobalLayout from "../components/GlobalLayout";
-import Message from "../pages/Message";
+import Home from "../pages/home/Home";
+import Login from "../pages/login/Login";
+import Resister from "../pages/resister/Resister";
+import GlobalLayout from "../components/common/GlobalLayout";
+import Message from "../pages/message/Message";
 import PrivateRoute from "../privateRrote/PrivateRoute";
 
 const Router = () => {

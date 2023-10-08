@@ -1,11 +1,11 @@
 import styled from "styled-components";
-import Search from "../components/home/Search";
-import UserList from "../components/home/UserList";
-import AddUser from "../components/home/AddUser";
+import Search from "../../components/homePage/search/Search";
+import UserList from "../../components/homePage/userlist/UserList";
+import AddUser from "../../components/homePage/adduser/AddUser";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../redux/config/ConfigStore";
+import { RootState } from "../../redux/config/ConfigStore";
 import { useEffect, useState } from "react";
-import api from "../utils/api";
+import api from "../../utils/api";
 import { io, Socket } from "socket.io-client";
 import {
   socketInfo,
@@ -13,21 +13,24 @@ import {
   realTimeMsgFc,
   realTimeUserFc,
   newConversationFc,
-} from "../redux/modules/socketSlice";
-import { Conversation } from "../model/conversation";
+} from "../../redux/modules/socketSlice";
+import { Conversation } from "../../model/conversation";
+import { conversationSortFc } from "../../utility/dateUtility";
+import * as S from "./Home.styled";
 
 const Home = () => {
   const { userState } = useSelector((state: RootState) => state.user);
+
   const realTimeMsg = useSelector(
     (state: RootState) => state.socket.realTimeMsg
   );
   const [conversation, setConversation] = useState<Conversation[]>([]);
-
-  const socket = useSelector((state: RootState) => state.socket.socketState);
-  const isSocket = useSelector((state: RootState) => state.socket.isSocket);
   const newConversationFriend = useSelector(
     (state: RootState) => state.socket.newConversationFriend
   );
+
+  const socket = useSelector((state: RootState) => state.socket.socketState);
+  const isSocket = useSelector((state: RootState) => state.socket.isSocket);
 
   const dispatch = useDispatch();
 
@@ -50,7 +53,6 @@ const Home = () => {
       socketAsSocket.emit("addUser", userState._id);
       socketAsSocket.on("getUsers", (users) => dispatch(realTimeUserFc(users)));
       socketAsSocket.on("getMessageInHome", (message) => {
-        console.log("message", message);
         dispatch(
           realTimeMsgFc({
             ...message,
@@ -59,7 +61,7 @@ const Home = () => {
         );
       });
       socketAsSocket.on("newChatFriendInfo", (sender) => {
-        dispatch(newConversationFc(sender[0].userId));
+        dispatch(newConversationFc(sender.userId));
       });
 
       dispatch(isSocketFc(true));
@@ -67,8 +69,8 @@ const Home = () => {
   }, [userState._id]);
 
   useEffect(() => {
+    //채팅방
     const getConversation = async () => {
-      console.log("home-getConversation");
       if (userState?._id) {
         const response = await api.get(`/conversation/${userState?._id}`);
         setConversation(response.data.conversation);
@@ -79,7 +81,7 @@ const Home = () => {
   }, [userState._id, newConversationFriend]);
 
   useEffect(() => {
-    console.log("home-realTimeMsg");
+    //실시간 업데이트 -> 채팅방 업데이트
     if (realTimeMsg && Object.keys(realTimeMsg).length) {
       setConversation((pre) => {
         return pre.map((p) =>
@@ -97,31 +99,9 @@ const Home = () => {
   }, [realTimeMsg]);
 
   const conversationSort = () => {
-    conversation.sort((a, b) => {
-      const newA = new Date(a.updatedAt);
-      const newB = new Date(b.updatedAt);
+    const sorted = conversationSortFc(conversation);
 
-      const yearA = newA.getFullYear();
-      const monthA = newA.getMonth() + 1;
-      const dayA = newA.getDate();
-      const hoursA = newA.getHours();
-      const minutesA = newA.getMinutes();
-      const TimeA = newA.getTime();
-
-      const yearB = newB.getFullYear();
-      const monthB = newB.getMonth() + 1;
-      const dayB = newB.getDate();
-      const hoursB = newB.getHours();
-      const minutesB = newB.getMinutes();
-      const TimeB = newB.getTime();
-
-      const aaa = yearA + monthA + dayA + hoursA + minutesA + TimeA;
-      const bbb = yearB + monthB + dayB + hoursB + minutesB + TimeB;
-
-      return bbb - aaa;
-    });
-
-    return conversation.map((con) => {
+    return sorted.map((con) => {
       const conDate = new Date(con.updatedAt);
       return (
         <UserList
@@ -134,25 +114,17 @@ const Home = () => {
   };
 
   return (
-    <HomeContainer>
+    <main>
       <Search />
       <AddUser conversation={conversation} userState={userState} />
 
       {conversation.length !== 0 ? (
         conversationSort()
       ) : (
-        <NoMessage>메시지가 없습니다.</NoMessage>
+        <S.NoMessage>메시지가 없습니다.</S.NoMessage>
       )}
-    </HomeContainer>
+    </main>
   );
 };
 
 export default Home;
-
-const HomeContainer = styled.div``;
-
-const NoMessage = styled.div`
-  margin-top: 40px;
-  text-align: center;
-  color: white;
-`;

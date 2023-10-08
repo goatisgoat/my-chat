@@ -17,9 +17,11 @@ function App() {
         const response = await api.get(`/user/auth/me`);
 
         if (response.status === 200) {
-          dispatch(userInfo(response.data.user));
+          return dispatch(userInfo(response.data.user));
         }
       }
+
+      throw new Error();
     } catch (error) {
       console.log(error);
       dispatch(userInfo({ name: null, email: null, _id: null }));
@@ -27,7 +29,6 @@ function App() {
   };
 
   useEffect(() => {
-    console.log("app-useEffeet");
     getUser();
   }, []);
   return (
