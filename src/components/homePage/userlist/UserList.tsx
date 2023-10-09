@@ -26,7 +26,7 @@ const UserList = ({ conversations, signedUserId }: Props) => {
   return (
     <S.ListContainer onClick={() => navigate(`/message/${conversations._id}`)}>
       <S.ImgWrap>
-        <S.UserImg></S.UserImg>
+        <S.UserImg src={friendId?.userImgUrl} />
         <div>
           <S.UserMame>{friendId?.userName}</S.UserMame>
           {conversations?.lastMessage ? (

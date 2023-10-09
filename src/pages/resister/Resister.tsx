@@ -18,7 +18,14 @@ const Resister = () => {
   const handleResister = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      const response = await api.post("/user", { name, email, password });
+      const userImgUrl =
+        "https://static.thenounproject.com/png/1743561-200.png";
+      const response = await api.post("/user", {
+        name,
+        email,
+        password,
+        userImgUrl,
+      });
 
       if (response.status === 200) {
         return navigate("/login");

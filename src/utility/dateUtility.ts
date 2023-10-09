@@ -45,3 +45,18 @@ export const getTotalDate = (prevDate: Date, currentDate: Date) => {
 
   return { prevTotal, CurrentTotal, currentYear, currentMonth, currentDay };
 };
+
+export const getChatDate = (current: Date, next: Date) => {
+  const currentDate = new Date(current);
+  const nextDate = new Date(next);
+
+  //지금 메시지 시간
+  const currentHours = currentDate.getHours();
+  const currentMinutes = currentDate.getMinutes();
+
+  //다음 메시지 시간
+  const nextHours = nextDate.getHours();
+  const nextMinutes = nextDate.getMinutes();
+
+  return { currentHours, currentMinutes, nextHours, nextMinutes };
+};

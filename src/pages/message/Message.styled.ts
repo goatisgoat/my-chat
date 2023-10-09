@@ -21,6 +21,8 @@ export const TopBarName = styled.div`
 `;
 
 export const ReturnBtn = styled.div`
+  display: flex;
+  align-items: center;
   position: absolute;
   left: 10px;
 `;
