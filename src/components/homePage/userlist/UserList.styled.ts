@@ -11,18 +11,19 @@ export const ListContainer = styled.div`
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid ${colors.gray_100};
+  cursor: pointer;
 `;
 export const ImgWrap = styled.div`
   display: flex;
   align-items: center;
 `;
 
-export const UserImg = styled.div`
+export const UserImg = styled.img`
   width: 50px;
   height: 50px;
+  object-fit: cover;
   margin-right: 15px;
   border-radius: 50%;
-  background-color: ${colors.white};
 `;
 
 export const UserMame = styled.div`

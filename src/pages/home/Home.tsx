@@ -1,4 +1,3 @@
-import styled from "styled-components";
 import Search from "../../components/homePage/search/Search";
 import UserList from "../../components/homePage/userlist/UserList";
 import AddUser from "../../components/homePage/adduser/AddUser";
@@ -25,6 +24,10 @@ const Home = () => {
     (state: RootState) => state.socket.realTimeMsg
   );
   const [conversation, setConversation] = useState<Conversation[]>([]);
+  const [searchConversation, setSearchConversation] = useState<Conversation[]>(
+    []
+  );
+  const [searchValue, setSearchValue] = useState<string>("");
   const newConversationFriend = useSelector(
     (state: RootState) => state.socket.newConversationFriend
   );
@@ -69,27 +72,27 @@ const Home = () => {
   }, [userState._id]);
 
   useEffect(() => {
-    //채팅방
-    const getConversation = async () => {
+    //채팅방 리스트
+    const getConversationList = async () => {
       if (userState?._id) {
         const response = await api.get(`/conversation/${userState?._id}`);
         setConversation(response.data.conversation);
       }
     };
 
-    getConversation();
+    getConversationList();
   }, [userState._id, newConversationFriend]);
 
   useEffect(() => {
     //실시간 업데이트 -> 채팅방 업데이트
-    if (realTimeMsg && Object.keys(realTimeMsg).length) {
+    const isRealTImeUpdated = realTimeMsg && Object.keys(realTimeMsg).length;
+    if (isRealTImeUpdated) {
       setConversation((pre) => {
         return pre.map((p) =>
           p._id === realTimeMsg.conversationId
             ? {
                 ...p,
                 updatedAt: realTimeMsg.createdAt,
-                lastSenderName: realTimeMsg.lastSenderName,
                 lastMessage: realTimeMsg.text,
               }
             : p
@@ -99,13 +102,22 @@ const Home = () => {
   }, [realTimeMsg]);
 
   const conversationSort = () => {
-    const sorted = conversationSortFc(conversation);
+    let obj;
+    if (searchValue) {
+      obj = searchConversation;
+    } else {
+      obj = conversation;
+    }
+
+    if (obj.length === 0) {
+      return <S.NoMessage>메시지가 없습니다.</S.NoMessage>;
+    }
+    const sorted = conversationSortFc(obj);
 
     return sorted.map((con) => {
-      const conDate = new Date(con.updatedAt);
       return (
         <UserList
-          key={conDate.getTime()}
+          key={con._id}
           conversations={con}
           signedUserId={userState._id}
         />
@@ -115,14 +127,14 @@ const Home = () => {
 
   return (
     <main>
-      <Search />
+      <Search
+        conversation={conversation}
+        setSearchConversation={setSearchConversation}
+        setSearchValue={setSearchValue}
+      />
       <AddUser conversation={conversation} userState={userState} />
 
-      {conversation.length !== 0 ? (
-        conversationSort()
-      ) : (
-        <S.NoMessage>메시지가 없습니다.</S.NoMessage>
-      )}
+      {conversationSort()}
     </main>
   );
 };

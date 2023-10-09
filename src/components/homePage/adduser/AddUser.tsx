@@ -45,14 +45,17 @@ const AddUser = ({ conversation, userState }: Props) => {
 
   const createConversation = async (
     friendId: string | null,
-    friendName: string | null
+    friendName: string | null,
+    friendImg: string | null
   ) => {
     try {
       const response = await api.post(`/conversation`, {
         senderId: userState._id,
         senderName: userState.name,
+        senderImg: userState.userImgUrl,
         receiverId: friendId,
         receiverName: friendName,
+        receiverImg: friendImg,
       });
 
       if (!response) throw new Error();
@@ -86,7 +89,7 @@ const AddUser = ({ conversation, userState }: Props) => {
       }) ? (
         <S.UserList key={index}>
           <S.UserListImg>
-            <S.UserImg></S.UserImg>
+            <S.UserImg src={user.userImgUrl as string} />
             <div>{user.name}</div>
           </S.UserListImg>
           <div>
@@ -98,12 +101,14 @@ const AddUser = ({ conversation, userState }: Props) => {
       ) : (
         <S.UserList key={index}>
           <S.UserListImg>
-            <S.UserImg></S.UserImg>
+            <S.UserImg src={user.userImgUrl as string} />
             <div>{user.name}</div>
           </S.UserListImg>
           <div>
             <S.MakeMsgBtn
-              onClick={() => createConversation(user._id, user.name)}
+              onClick={() =>
+                createConversation(user._id, user.name, user.userImgUrl)
+              }
             >
               대화 시작
             </S.MakeMsgBtn>
@@ -116,17 +121,31 @@ const AddUser = ({ conversation, userState }: Props) => {
   return (
     <>
       <S.Container>
-        <S.AddBtn onClick={() => setIsOpenList((pre) => !pre)}>+</S.AddBtn>
+        <S.AddBtn onClick={() => setIsOpenList((pre) => !pre)}>
+          <svg
+            fill="white"
+            xmlns="http://www.w3.org/2000/svg"
+            height="1em"
+            viewBox="0 0 448 512"
+          >
+            <path d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H48c-17.7 0-32 14.3-32 32s14.3 32 32 32H192V432c0 17.7 14.3 32 32 32s32-14.3 32-32V288H400c17.7 0 32-14.3 32-32s-14.3-32-32-32H256V80z" />
+          </svg>
+        </S.AddBtn>
         {userState && realTimeFriends.length > 0
-          ? realTimeFriends.map((f, i) => (
-              <S.OnLineUser
-                onClick={() => navigate(`/message/${f._id}`)}
-                key={i}
-              >
-                <S.OnLineUserImg></S.OnLineUserImg>
-                <S.OnLineCircle></S.OnLineCircle>
-              </S.OnLineUser>
-            ))
+          ? realTimeFriends.map((f, i) => {
+              const onlineFriendInfo = f.members.find(
+                (f) => f.userId !== userState._id
+              );
+              return (
+                <S.OnLineUser
+                  onClick={() => navigate(`/message/${f._id}`)}
+                  key={i}
+                >
+                  <S.OnLineUserImg src={onlineFriendInfo?.userImgUrl} />
+                  <S.OnLineCircle></S.OnLineCircle>
+                </S.OnLineUser>
+              );
+            })
           : null}
       </S.Container>
       {isOpenList ? (

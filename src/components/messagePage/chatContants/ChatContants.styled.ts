@@ -17,12 +17,21 @@ export const ChatsWrap = styled.div`
   margin-bottom: 20px;
 `;
 
-export const ChatImg = styled.div`
+export const ChatImg = styled.img`
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  margin-right: 10px;
+  border-radius: 50%;
+  background-color: ${colors.white};
+`;
+
+export const ChatDisabledImg = styled.div`
   width: 40px;
   height: 40px;
   margin-right: 10px;
   border-radius: 50%;
-  background-color: ${colors.white};
+  background-color: ${colors.back_ground};
 `;
 
 export const ContentMessageWrap = styled.div`

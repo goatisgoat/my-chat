@@ -6,7 +6,7 @@ type UserState = {
 };
 
 const initialState: UserState = {
-  userState: { name: null, email: null, _id: null },
+  userState: { name: null, email: null, _id: null, userImgUrl: null },
 };
 
 const userSlice = createSlice({
@@ -17,7 +17,12 @@ const userSlice = createSlice({
       state.userState = action.payload;
     },
     deleteInfo: (state, action) => {
-      state.userState = { name: null, email: null, _id: null };
+      state.userState = {
+        name: null,
+        email: null,
+        _id: null,
+        userImgUrl: null,
+      };
     },
   },
 });

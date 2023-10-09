@@ -5,10 +5,15 @@ import { RootState } from "../../redux/config/ConfigStore";
 
 const Navbar = () => {
   const { userState } = useSelector((state: RootState) => state.user);
+
   return (
     <NavContainer>
       <h1>Chats</h1>
-      {userState._id ? <UserImg></UserImg> : <Link to={"/login"}>log in</Link>}
+      {userState._id ? (
+        <UserImg src={userState.userImgUrl as string} />
+      ) : (
+        <Link to={"/login"}>log in</Link>
+      )}
     </NavContainer>
   );
 };
@@ -31,9 +36,9 @@ const NavContainer = styled.div`
   }
 `;
 
-const UserImg = styled.div`
-  width: 40px;
-  height: 40px;
+const UserImg = styled.img`
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
   border-radius: 50%;
-  background-color: aliceblue;
 `;

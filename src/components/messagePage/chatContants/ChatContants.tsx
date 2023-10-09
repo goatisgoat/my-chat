@@ -1,16 +1,16 @@
 import { ReactNode, useEffect, useRef } from "react";
 import { MessageType } from "../../../model/messageType";
-import { Userstate } from "../../../model/user";
-import { getTotalDate } from "../../../utility/dateUtility";
+import { FriendInfo, Userstate } from "../../../model/user";
+import { getChatDate, getTotalDate } from "../../../utility/dateUtility";
 import * as S from "./ChatContants.styled";
 
 type Props = {
   message: MessageType[];
   userState: Userstate;
+  friendInfo: FriendInfo | null;
 };
 
-const ChatContants = ({ message, userState }: Props) => {
-  const isNextUserSame = useRef<boolean>(true);
+const ChatContants = ({ message, userState, friendInfo }: Props) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   //스크롤
@@ -24,28 +24,13 @@ const ChatContants = ({ message, userState }: Props) => {
     nextUser: string,
     nextCreatedAt: Date
   ) => {
-    const currentDate = new Date(currentCreatedAt);
-    const nextDate = new Date(nextCreatedAt);
-
-    //지금 메시지 시간
-    const currentHours = currentDate.getHours();
-    const currentMinutes = currentDate.getMinutes();
-
-    //다음 메시지 시간
-    const nextHours = nextDate.getHours();
-    const nextMinutes = nextDate.getMinutes();
-
-    //지금 + 다음 유저 일치
-    if (currentUser === nextUser) {
-      isNextUserSame.current = false;
-    } else {
-      isNextUserSame.current = true;
-    }
+    const { currentHours, currentMinutes, nextHours, nextMinutes } =
+      getChatDate(currentCreatedAt, nextCreatedAt);
 
     if (
       currentHours === nextHours &&
       currentMinutes === nextMinutes &&
-      isNextUserSame.current === false
+      currentUser === nextUser
     ) {
       return "";
     }
@@ -64,6 +49,30 @@ const ChatContants = ({ message, userState }: Props) => {
         </S.SpaceDiv>
       );
     } else return null;
+  };
+
+  const messageImg = (
+    currentUser: string,
+    currentCreatedAt: Date,
+    nextUser: string,
+    nextCreatedAt: Date
+  ) => {
+    const { currentHours, currentMinutes, nextHours, nextMinutes } =
+      getChatDate(currentCreatedAt, nextCreatedAt);
+
+    if (currentUser !== nextUser) {
+      return <S.ChatImg src={friendInfo?.userImgUrl} />;
+    }
+
+    if (
+      currentHours === nextHours &&
+      currentMinutes === nextMinutes &&
+      currentUser === nextUser
+    ) {
+      return <S.ChatDisabledImg></S.ChatDisabledImg>;
+    }
+
+    return <S.ChatImg src={friendInfo?.userImgUrl} />;
   };
 
   return (
@@ -96,7 +105,12 @@ const ChatContants = ({ message, userState }: Props) => {
           <>
             {bottomLineDate(message[index - 1]?.createdAt, msg?.createdAt)}
             <S.ChatsWrap ref={scrollRef} key={index}>
-              <S.ChatImg></S.ChatImg>
+              {messageImg(
+                msg?.senderId,
+                msg.createdAt,
+                message[index + 1]?.senderId,
+                message[index + 1]?.createdAt
+              )}
               <S.ContentMessageWrap>
                 <S.Message>
                   {" "}

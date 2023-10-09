@@ -55,6 +55,7 @@ const Message = () => {
       conversationId: conversationId,
       senderId: userState._id,
       text: newMessage,
+      senderImgUrl: userState.userImgUrl,
     };
 
     //socket
@@ -62,9 +63,9 @@ const Message = () => {
       const socketAsSocket = socket as Socket;
       socketAsSocket.emit("sendMessage", {
         senderId: userState._id,
-        lastSenderName: userState.name,
         receiverId: friendInfo?._id,
         text: newMessage,
+        senderImgUrl: userState.userImgUrl,
         conversationId: conversationId,
       });
     }
@@ -87,6 +88,7 @@ const Message = () => {
           createdAt: realTimeMsg.createdAt,
           senderId: realTimeMsg.senderId,
           text: realTimeMsg.text,
+          senderImgUrl: realTimeMsg.senderImgUrl,
         };
 
         setMessage((pre) => [...pre, realTimeObj]);
@@ -99,10 +101,24 @@ const Message = () => {
   return (
     <S.MsgContainer>
       <S.TopBarName>
-        <S.ReturnBtn onClick={() => navigate(-1)}>{"<"}</S.ReturnBtn>
+        <S.ReturnBtn onClick={() => navigate(-1)}>
+          <svg
+            fill="white"
+            xmlns="http://www.w3.org/2000/svg"
+            height="1em"
+            viewBox="0 0 320 512"
+          >
+            {" "}
+            <path d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l192 192c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L77.3 256 246.6 86.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-192 192z" />
+          </svg>
+        </S.ReturnBtn>
         {friendInfo?.name}
       </S.TopBarName>
-      <ChatContants message={message} userState={userState} />
+      <ChatContants
+        message={message}
+        userState={userState}
+        friendInfo={friendInfo}
+      />
       <S.ChatInput>
         <S.Form onSubmit={handleNewMessage}>
           <S.ChatInputWrap>

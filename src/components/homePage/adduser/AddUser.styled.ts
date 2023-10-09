@@ -24,6 +24,7 @@ export const AddBtn = styled.div`
     ${colors.add_purple} 20%,
     ${colors.add_Pink} 80%
   );
+  cursor: pointer;
 `;
 
 export const OnLineUser = styled.div`
@@ -40,11 +41,13 @@ export const OnLineUser = styled.div`
     ${colors.add_Pink} 80%
   );
   position: relative;
+  cursor: pointer;
 `;
 
-export const OnLineUserImg = styled.div`
+export const OnLineUserImg = styled.img`
   width: 50px;
   height: 50px;
+  object-fit: cover;
   border-radius: 50%;
   background-color: ${colors.white};
 `;
@@ -94,7 +97,8 @@ export const UserList = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 10px;
+  border-bottom: 1px solid ${colors.gray_100};
+  padding: 10px 0;
 `;
 
 export const UserListImg = styled.div`
@@ -102,11 +106,11 @@ export const UserListImg = styled.div`
   align-items: center;
 `;
 
-export const UserImg = styled.div`
-  width: 40px;
-  height: 40px;
+export const UserImg = styled.img`
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
-  background-color: ${colors.make_chat_pink_btn};
+  object-fit: cover;
   margin-right: 10px;
 `;
 

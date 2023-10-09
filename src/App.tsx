@@ -24,7 +24,9 @@ function App() {
       throw new Error();
     } catch (error) {
       console.log(error);
-      dispatch(userInfo({ name: null, email: null, _id: null }));
+      dispatch(
+        userInfo({ name: null, email: null, _id: null, userImgUrl: null })
+      );
     }
   };
 
