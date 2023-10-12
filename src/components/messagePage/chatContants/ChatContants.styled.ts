@@ -6,15 +6,16 @@ export const Chats = styled.div`
   height: calc(100vh - 125px);
   padding: 10px;
   overflow-y: scroll;
-
+  /* transform: scaleY(-1); */
   &::-webkit-scrollbar {
-    display: none; /* Chrome, Safari, Opera*/
+    /* display: none;  */
   }
 `;
 
 export const ChatsWrap = styled.div`
   display: flex;
   margin-bottom: 20px;
+  /* transform: scaleY(-1); */
 `;
 
 export const ChatImg = styled.img`
