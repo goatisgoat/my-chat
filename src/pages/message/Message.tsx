@@ -1,6 +1,6 @@
 import ChatContants from "../../components/messagePage/chatContants/ChatContants";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import api from "../../utils/api";
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux/config/ConfigStore";
@@ -8,6 +8,7 @@ import { Socket } from "socket.io-client";
 import { MessageType } from "../../model/messageType";
 import { FriendInfo } from "../../model/user";
 import * as S from "./Message.styled";
+import { messageSortFc } from "../../utility/dateUtility";
 
 const Message = () => {
   const { userState } = useSelector((state: RootState) => state.user);
@@ -22,35 +23,66 @@ const Message = () => {
   const [message, setMessage] = useState<MessageType[]>([]);
   const [newMessage, setNewMessage] = useState<string>("");
 
+  const [pageNum, setPageNum] = useState(1);
+  const pageLimit = 15;
+  const isFetching = useRef<boolean>(false);
+
+  const toBottemRef = useRef<boolean>(false);
+  const fixedScrollRef = useRef<boolean>(true);
+
   const navigate = useNavigate();
   const location = useLocation();
   const conversationId = location.pathname.split("/")[2];
 
   useEffect(() => {
-    const getMessageFriendInfo = async () => {
+    const getFriendInfo = async () => {
       try {
-        const messagerResponse = await api.get(`/message/${conversationId}`);
-        if (!messagerResponse) throw new Error();
-
         const friendResponse = await api.post(`/user/find-friend`, {
           conversationId,
           userId: userState._id,
         });
         if (!friendResponse) throw new Error();
 
-        setMessage(messagerResponse.data.messages);
         setFriendInfo(friendResponse.data.friendInfo);
       } catch (error) {
         console.log(error);
       }
     };
 
-    getMessageFriendInfo();
+    getFriendInfo();
   }, []);
+
+  useEffect(() => {
+    const getMessage = async () => {
+      try {
+        toBottemRef.current = false;
+        fixedScrollRef.current = true;
+
+        isFetching.current = true;
+        const messagerResponse = await api.get(
+          `/message/${conversationId}?page=${pageNum}&per=${pageLimit}`
+        );
+        if (!messagerResponse) throw new Error();
+        if (messagerResponse.data.messages.length === 0) throw new Error();
+
+        const sorted = messageSortFc(messagerResponse.data.messages);
+        setMessage((pre) => [...sorted, ...pre]);
+        isFetching.current = false;
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    getMessage();
+  }, [pageNum]);
+
+  console.log(message);
 
   const handleNewMessage = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    toBottemRef.current = true;
+    fixedScrollRef.current = false;
 
+    if (newMessage === "") return alert("메시지를 입력해 주세요");
     const message = {
       conversationId: conversationId,
       senderId: userState._id,
@@ -118,12 +150,17 @@ const Message = () => {
         message={message}
         userState={userState}
         friendInfo={friendInfo}
+        setPageNum={setPageNum}
+        isFetching={isFetching}
+        toBottemRef={toBottemRef}
+        fixedScrollRef={fixedScrollRef}
       />
       <S.ChatInput>
         <S.Form onSubmit={handleNewMessage}>
           <S.ChatInputWrap>
             <input
               type="text"
+              autoFocus
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
             />

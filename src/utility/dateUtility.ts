@@ -1,4 +1,5 @@
 import { Conversation } from "../model/conversation";
+import { MessageType } from "../model/messageType";
 
 export const conversationSortFc = (conversation: Conversation[]) => {
   const sorted = conversation.sort((a, b) => {
@@ -46,9 +47,14 @@ export const getTotalDate = (prevDate: Date, currentDate: Date) => {
   return { prevTotal, CurrentTotal, currentYear, currentMonth, currentDay };
 };
 
-export const getChatDate = (current: Date, next: Date) => {
+export const getChatDate = (prev: Date, current: Date, next: Date) => {
+  const prevDate = new Date(prev);
   const currentDate = new Date(current);
   const nextDate = new Date(next);
+
+  //이전 메시지 시간
+  const prevHours = prevDate.getHours();
+  const prevMinutes = prevDate.getMinutes();
 
   //지금 메시지 시간
   const currentHours = currentDate.getHours();
@@ -58,5 +64,40 @@ export const getChatDate = (current: Date, next: Date) => {
   const nextHours = nextDate.getHours();
   const nextMinutes = nextDate.getMinutes();
 
-  return { currentHours, currentMinutes, nextHours, nextMinutes };
+  return {
+    prevHours,
+    prevMinutes,
+    currentHours,
+    currentMinutes,
+    nextHours,
+    nextMinutes,
+  };
+};
+
+export const messageSortFc = (message: MessageType[]) => {
+  const sorted = message.sort((a, b) => {
+    const newA = new Date(a.createdAt);
+    const newB = new Date(b.createdAt);
+
+    const yearA = newA.getFullYear();
+    const monthA = newA.getMonth() + 1;
+    const dayA = newA.getDate();
+    const hoursA = newA.getHours();
+    const minutesA = newA.getMinutes();
+    const TimeA = newA.getTime();
+
+    const yearB = newB.getFullYear();
+    const monthB = newB.getMonth() + 1;
+    const dayB = newB.getDate();
+    const hoursB = newB.getHours();
+    const minutesB = newB.getMinutes();
+    const TimeB = newB.getTime();
+
+    const totalA = yearA + monthA + dayA + hoursA + minutesA + TimeA;
+    const totalB = yearB + monthB + dayB + hoursB + minutesB + TimeB;
+
+    return totalA - totalB;
+  });
+
+  return sorted;
 };
